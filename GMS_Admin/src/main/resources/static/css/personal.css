@@ -1,0 +1,26 @@
+.col-lg-12 {
+     padding-left: 15px; 
+     padding-right: 15px; 
+}
+.top-notice{
+    margin-top: 3px;  
+    padding: 10px 0; 
+    padding-left: 15px;
+}
+.top-notice a{
+    font-size: 14px;
+    text-decoration: none;
+}
+.form-control {
+    width: 100%;
+}
+.btn-sm {
+    font-size: 10px;
+}
+.sh{
+	height:25px;
+}
+.sw{
+    width: 42px;
+    padding-left: 5px;
+}

@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <title>bck_order</title>
+    <style>
+        html { overflow-x:hidden; }
+        .table {
+            margin-left: 10px;
+        }
+
+        /* 清除面板边框 */
+        .panel-default {
+            border: 0px;
+        }
+
+        /* 控制面板间距 */
+        .panel-body {
+            margin: 0px 10px;
+            width: 1410px;
+        }
+
+        /* 设置按钮间距 */
+        .bt2 {
+            margin-left: 10px;
+        }
+
+        /* 表单1调整 */
+        .form1-tx {
+            width: 50%;
+        }
+
+        .form1-bt {
+            height: 26px;
+        }
+
+        /* 设置发布通知按钮间距 */
+        .preadd-btn {
+            margin-left: 127px;
+        }
+
+        table tbody tr td:last-of-type {
+            
+            border-bottom: 1px solid;
+            border-color: #e3e3e3;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="panel panel-default" id="order_vue">
+        <div class="panel-body container">
+            <div class="row">
+                <div class="col-sm-4">
+                    <form id="query_order">
+                        <span>关键字查询:</span>
+                        <input type="text" class="form1-tx" id="query_key" name="query_key" v-model="query_key">
+                        <input type="button" class="form1-bt btn btn-sm btn-primary" value="查询" @click="currentPage=1,change()">
+                    </form>
+                </div>
+                <div class="col-sm-4"></div>
+                <div class="col-sm-2" style="padding-left: 30px;">
+                    <button type="button" onclick="export_order()"
+                        class="preadd-btn btn btn-warning btn-sm">导出数据</button>
+                </div>
+            </div>
+        </div>
+        <!-- Table -->
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>预约场地</th>
+                    <th>场地类别</th>
+                    <th>预约人</th>
+                    <th>预约日期<img id="dd" onclick="change_sort(this)" style="margin-bottom:2px;margin-left:2px;" src="../img/sort.png"></th>
+                    <th>开始时间</th>
+                    <th>结束时间</th>
+                    <th>预约价格<img id="pp" onclick="change_sort(this)" style="margin-bottom:2px;margin-left:2px;" src="../img/sort.png"></th>
+                    <th>预约生成时间<img id="tt" onclick="change_sort(this)" style="margin-bottom:2px;margin-left:2px;" src="../img/sort.png"></th>
+                    <th>预约状态</th> 
+                </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(order,index) in list">
+                <th scope="row">{{index+1+currentCount*currentPage-currentCount}}</th>
+                <td>{{order.order_Venue.venue_Name}}</td>
+                <td>{{order.order_Venue.venue_Type}}</td>
+                <td><a tabindex="0" style="text-decoration:none;" role="button" data-toggle="popover" data-html="true" data-trigger="focus" title="用户详细信息" data-container="body" 
+                  :data-content="getContent(order.order_User.user_Id,order.order_User.user_Email,order.order_User.user_Sex,order.order_User.user_Age)">{{order.order_User.user_Id}}</a></td>
+                <td>{{order.order_Date}}</td>
+                <td>{{order.order_St}}:00</td>
+                <td>{{order.order_Ed}}:00</td>
+                <td>{{order.order_Price}}</td>
+                <td>{{order.order_Mktime}}</td>
+                <td v-if="order.order_State==0"><span class="label label-warning" style="padding: 8px; font-size:85%">进行中</span></td>
+                <td v-else-if="order.order_State==1"><span class="label label-danger" style="padding: 8px; font-size:85%">已取消</span></td>
+                <td v-else><span class="label label-success" style="padding: 8px; font-size:85%">已成功</span></td>
+              </tr>
+            </tbody>
+        </table>
+        <div class="container" style="width: 1410px;">
+          <div class="row">
+              <div class="col-sm-7" style="margin-top:23px;">
+                  <div class="row">
+                      <div class="col-sm-5" style="padding-right: 0px; width:300px">
+                          <span style="font-size: 20px;">当前总共有{{totalCount}}条数据,每页显示</span>
+                      </div>
+                      <div class="col-sm-2" style="padding-left: 10px;padding-right:0px; width:55px;">
+                          <div class="dropdown showpagenum">
+                              <button class="btn btn-default dropdown-toggle" style="height: 27px; padding-top:3px;"
+                                  type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true"
+                                  aria-expanded="true">
+                                  <span style="display:inline-block;width:11px;">{{currentCount}}</span>
+                                  <span class="caret" style="margin-left: 3px;"></span>
+                              </button>
+                              <ul class="dropdown-menu" aria-labelledby="dropdownMenu1"
+                                  style="min-width: 41px;overflow:visible;">
+                                  <li><a href="javascript:void(0);" @click="currentCount=5,change()"
+                                          style="padding-left:14px;">5</a></li>
+                                  <li><a href="javascript:void(0);" @click="currentCount=7,change()"
+                                          style="padding-left:14px;">7</a></li>
+                                  <li><a href="javascript:void(0);" @click="currentCount=10,change()"
+                                          style="padding-left:14px;">10</a></li>
+                                  <li><a href="javascript:void(0);" @click="currentCount=15,change()"
+                                          style="padding-left:14px;">15</a></li>
+                                  <li><a href="javascript:void(0);" @click="currentCount=20,change()"
+                                          style="padding-left:14px;">20</a></li>
+                              </ul>
+                          </div>
+                      </div>
+                      <div class="col-sm-4" style="padding-left: 20px;">
+                          <span style="font-size: 20px;">条数据</span>
+                      </div>
+                  </div>
+              </div>
+              <div class="col-sm-5" style="margin-left:-60px;">
+                  <nav aria-label="Page navigation">
+                      <ul class="pagination">
+              
+              
+              <!-- 判断当前页是否是第一页 -->
+              <li v-if="currentPage==1" class="disabled">
+                <a href="javascript:void(0);" aria-label="Previous">
+                  <span aria-hidden="true">&laquo;</span>
+                </a>
+              </li>
+              <li v-else>
+                <a href="javascript:void(0);" @click="currentPage--,change()" aria-label="Previous">
+                  <span aria-hidden="true">&laquo;</span>
+                </a>
+              </li>
+
+              <li v-for="index in indexs" v-bind:class="{'active':index == currentPage}">
+                <a @click="currentPage=index,change()">{{index}}</a>
+              </li>
+            
+              <!-- 判断当前页是否是最后一页 -->
+              <li v-if="currentPage==totalPage" class="disabled">
+                <a href="javascript:void(0);" aria-label="Next"> 
+                  <span aria-hidden="true">&raquo;</span>
+                </a>
+              </li>
+              <li v-else>
+                <a href="javascript:void(0);" @click="currentPage++,change()" aria-label="Next"> 
+                  <span aria-hidden="true">&raquo;</span>
+                </a>
+              </li>
+              <li>
+                <a href="javascript:void(0);">共{{totalPage}}页</a>
+              </li>
+                        </ul>
+                    </nav>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</body>
+<script src="../js/jquery-3.4.1.min.js"></script>
+<script src="../js/bootstrap.min.js"></script>
+<script src="../js/vue.js"></script>
+<script type="text/javascript">
+  //全局vue
+  let order_vue;
+  $(function () {
+    $.ajax({ type: "POST", url: "/admin/getOrder", dataType: "json",
+      data:JSON.stringify({"query_key":"","currentPage":"1","currentCount":"5","sortStatus":"7"}), contentType : "application/json",
+      success: function(data) {
+      order_vue = new Vue({
+        el:'#order_vue',
+        data:{
+          query_key:data.query_key,
+          currentPage:data.currentPage,
+          currentCount:data.currentCount,
+          totalCount:data.totalCount,
+          totalPage:data.totalPage,
+          sortStatus:data.sortStatus,
+          list:data.list
+        },
+        computed:{
+          indexs: function(){
+            var left = 1;
+            var right = this.totalPage;
+            var ar = [];
+            if(this.totalPage>= 5){
+              if(this.currentPage > 3 && this.currentPage < this.totalPage-2){
+                left = this.currentPage - 2
+                right = this.currentPage + 2
+              }else{
+                if(this.currentPage<=3){
+                  left = 1
+                  right = 5
+                }else{
+                  right = this.totalPage
+                  left = this.totalPage - 4
+                }
+              }
+            }
+            while (left <= right){
+              ar.push(left)
+              left ++
+            }
+            return ar
+          }
+        },
+        methods:{
+          getContent(user_Id,user_Email,user_Sex,user_Age){
+            return "学号 : "+user_Id+"<br/>邮箱 : "+user_Email+"<br/>性别 : "+user_Sex+"<br/>年龄 : "+user_Age+"岁"
+          },
+          /*触发函数后再次请求数据*/
+          change(){
+            $.ajax({ type: "POST", url: "/admin/getOrder", dataType: "json",
+              data:JSON.stringify({"query_key":order_vue.query_key,"currentPage":order_vue.currentPage,"currentCount":order_vue.currentCount,"sortStatus":order_vue.sortStatus}), contentType : "application/json",
+              success: function(data) {
+              order_vue.query_key=data.query_key
+              order_vue.currentPage=data.currentPage
+              order_vue.currentCount=data.currentCount
+              order_vue.totalCount=data.totalCount
+              order_vue.totalPage=data.totalPage
+              order_vue.sortStatus=data.sortStatus
+              order_vue.list=data.list
+              order_vue.update_sort();
+              alert(order_vue.sortStatus);
+            }});
+          },
+          update_sort(){
+            //更新排序按钮
+            var flag1="false";
+            var flag2="false";
+            var flag3="false";
+            if(order_vue.sortStatus=='1'){ //日期降序
+              $('#dd').attr('src','../img/sort-down.png');
+              flag1="true";
+            }else  if(order_vue.sortStatus=='2'){ //日期升序
+              $('#dd').attr('src','../img/sort-up.png');
+              flag1="true";
+            }else  if(order_vue.sortStatus=='3'){ //价格降序
+              $('#pp').attr('src','../img/sort-down.png');
+              flag2="true";
+            }else  if(order_vue.sortStatus=='4'){ //价格升序
+              $('#pp').attr('src','../img/sort-up.png');
+              flag2="true";
+            }else  if(order_vue.sortStatus=='5'){ //时间降序
+              $('#tt').attr('src','../img/sort-down.png');
+              flag3="true";
+            }else  if(order_vue.sortStatus=='6'){ //时间升序
+              $('#tt').attr('src','../img/sort-up.png');
+              flag3="true";
+            }
+            if("false"==flag1) $('#dd').attr('src','../img/sort.png');
+            if("false"==flag2) $('#pp').attr('src','../img/sort.png');
+            if("false"==flag3) $('#tt').attr('src','../img/sort.png');
+          }
+        }
+      })
+      $('[data-toggle="popover"]').popover();
+    }});
+  });     
+     /* 导出订单数据 */
+     function export_order(){
+    	 this.location.href="/admin/exportOrder";
+     }
+    
+    /* 切换排序方式 */
+    function change_sort(obj){
+    	var idd = $(obj).attr("id");
+        var sc = $(obj).attr('src');
+    	if(idd=="dd"){
+    		if(sc=='../img/sort.png') order_vue.sortStatus="1"; //当前是默认,点击变成日期降序
+    		else if(sc=='../img/sort-down.png') order_vue.sortStatus="2"; //当前是默认,点击变成日期升序
+    		else order_vue.sortStatus="7"; //当前是升序,恢复默认
+    	}
+    	else if(idd=="pp"){
+    		if(sc=='../img/sort.png') order_vue.sortStatus="3"; //当前是默认,点击变成价格降序
+    		else if(sc=='../img/sort-down.png') order_vue.sortStatus="4"; //当前是默认,点击变成价格升序
+    		else order_vue.sortStatus="7"; //当前是升序,恢复默认
+    	}
+    	else{
+    		if(sc=='../img/sort.png') order_vue.sortStatus="5"; //当前是默认,点击变成时间降序
+    		else if(sc=='../img/sort-down.png') order_vue.sortStatus="6"; //当前是默认,点击变成时间升序
+    		else order_vue.sortStatus="7"; //当前是升序,恢复默认
+    	}
+      order_vue.currentPage="1";
+      order_vue.change()
+    }
+</script>
+
+</html>

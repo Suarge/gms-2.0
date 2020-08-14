@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>体育管场地管理系统</title>
+    <link rel="stylesheet" href="../css/toast.css">
+    <link rel="stylesheet" href="../css/bootstrap.min.css">
+    <link rel="stylesheet" href="../css/SMS-index.css" />
+    <link rel="stylesheet" href="../css/swiper.min.css">
+    <link rel="stylesheet" href="../css/button.css">
+    <link rel="stylesheet" href="../css/showMessage.css">
+    <link rel="stylesheet" href="../css/animate.css">
+</head>
+
+<body>
+<div id="app">
+    <!--引入头部-->
+    <div class="header">
+        <div class="real_header">
+            <a href="#" style="text-decoration: none; color: #337ab7;"> <img src="../img/logo.png"
+                    class="head_img"> <span class="head_span1">体育馆场地管理系统</span>
+            </a>
+            <div class="login">
+                <div >
+                    <a v-if="user_Id ==''" v-on:click="toLogin" style="margin-left: -60px;">登录</a>
+                    <a v-else style="margin-left: -60px;" ></a>
+                </div>
+                <div class="dropdown" style="margin-top: -22px;">
+                    <a v-if="user_Id ==''" class="dropdown-toggle" data-toggle="dropdown"
+                       role="button" aria-haspopup="true" aria-expanded="false"> <i
+                            class="glyphicon glyphicon-user"></i> 个人中心
+                    </a>
+                    <a id="session_user" v-else class="dropdown-toggle" data-toggle="dropdown"
+                       role="button" aria-haspopup="true" aria-expanded="false"> <i
+                            class="glyphicon glyphicon-user"></i> {{user_Id}}
+                    </a>
+                    <ul class="dropdown-menu " aria-labelledby="dropdownMenu1">
+                        <li>
+                            <a v-on:click="toCenter" data-toggle="modal" >
+                                <i class="glyphicon glyphicon-user"></i>
+                                个人中心
+                            </a>
+                        </li>
+                        <li role="separator" class="divider"></li>
+                        <li>
+                            <a v-on:click="loginOut" >
+                                <i class="glyphicon glyphicon-off"></i>
+                                注销登录
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+        <div class="top_line"></div>
+        <div class="message">
+            <p style="width: 1000px; margin: 0 auto; height: 30px; line-height: 30px;">
+                <img style="margin-left: -6px;" src="../img/laba.png">
+                <span id="topnotice">通知：
+
+                    </span>
+            </p>
+        </div>
+    </div>
+</div>
+    <!-- 展示栏 -->
+    <div class="container" style="margin-top: 36px;">
+        <!--场馆类型标签页+场馆展示页-->
+        <div class="row " style="margin-top: 10px;">
+            <div class="col-lg-8" style="background-color: #FFFFFF;">
+                <!-- 场馆类型标签页 -->
+                <ul class="nav nav-tabs" id="myTab"  style="margin-top: 5px;">
+                    <!-- 异步请求 -->
+                </ul>
+                <!-- 场馆展示页 -->
+                <div class="tab-content row" id="message">
+                    <!-- 异步请求 -->
+                </div>
+
+            </div>
+            <!-- 通知公告 -->
+            <div class="col-lg-4"
+                 style="background-color: #FFFFFF; border-left: solid 10px; color: #f0f4f7;">
+                <p class="pig" style="border-bottom: 1px solid #e8e8e8; padding-bottom: 8px;">
+                    <span style="color: #333; font-size: 16px;">通知公告</span>
+                    <a class="pull-right" href="#" style="padding: 0 0px; color: #666; text-decoration: none;"></a><!-- 更多>> -->
+                </p>
+                <div class="nave">
+
+                    <ul id="noticeList" style="list-style-type: none; margin: 0; padding: 0;">
+                        <!--异步请求-->
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <!--预约状态+日期选择-->
+        <div class="row">
+            <div class="col-lg-12 "
+                 style="background-color: #FFFFFF; margin-top: 10px;">
+                <div class=" state" style="margin-top: 10px;">
+                    <span class="first" style="background: #fdb75d; margin-left: 5px;"></span><span>已预约</span>
+                    <span class="first" style="background: #22cf9c; margin-left: 20px;"></span><span>已选</span>
+                    <span class="first"
+                          style="background: #fff; border: 1px solid #999; margin-left: 20px;"></span><span>可预约</span>
+                    <span class="first" style="background: #ccc; margin-left: 20px;"></span><span>不可用</span>
+                    <!-- 日期插件 -->
+                    <div class="swiper-container" >
+                        <div class="swiper-wrapper">
+                            <div class="swiper-slide">
+                                <span id="nowdayone"></span>
+                                <!-- 将获得的日期放到这里 -->
+                                <input type="hidden" id = "swiper_tex" value="">
+                            </div>
+                            <div class="swiper-slide">
+                                <span id="nextdayone"></span>
+                            </div>
+                            <div class="swiper-slide">
+                                <span id="nextdaytwo"></span>
+                            </div>
+                        </div>
+                        <!-- 如果需要导航按钮 -->
+                        <div class="swiper-button-prev "
+                             style="color: #CCCCCC !important;"></div>
+                        <div class="swiper-button-next "
+                             style="color: #CCCCCC !important;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--所有场地-->
+        <div class="row">
+            <div class="col-lg-12">
+                <div style="background: #fff; padding: 15px; padding-top: 10px; position: relative;">
+                    <div style="width: 100%;">
+                        <table class="firstTable" id="venue_data">
+                            <!--场地时间安排-->
+                            <tr class="first firstTitle" style="background: #f0f4f7; line-height: 12px;">
+                                <td style="min-width: 90px; height: 50px;">场地</td>
+                                <td>9:00<br>-<br>10:00</td>
+                                <td>10:00<br>-<br>11:00</td>
+                                <td>11:00<br>-<br>12:00</td>
+                                <td>12:00<br>-<br>13:00</td>
+                                <td>13:00<br>-<br>14:00</td>
+                                <td>14:00<br>-<br>15:00</td>
+                                <td>15:00<br>-<br>16:00</td>
+                                <td>16:00<br>-<br>17:00</td>
+                                <td>17:00<br>-<br>18:00</td>
+                                <td>18:00<br>-<br>19:00</td>
+                            </tr>
+                            <!--场地信息-->
+                            <!--异步请求-->
+
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--我的预约-->
+        <div class="news" >
+            <div class="row">
+                <div class="col-lg-12">
+                    <p class="title">
+                        <span style="color: #333;font-size: 16px;">我的预约</span>
+                        <a style="text-decoration: none; margin-top: 4px; float: right; margin-right: 16px;  background-color: #35bbfb;"
+                           onclick="submitIfExits()" class="button button-primary button-pill button-small">确认预约
+                        </a>
+                    </p>
+                    <table class="secondTable">
+                        <tr class="first" style="background: #f0f4f7;">
+                            <td>预约场地类型</td>
+                            <td>预约场地名称</td>
+                            <td>预约时间</td>
+                            <td>预约费用</td>
+                        </tr>
+                        <!--异步请求-->
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--尾巴-->
+    <div class="container-fluid f_top">
+        <div class="row">
+            <div class="footer" style="position: relative;">
+                版权所有©GMS-体育馆场地管理系统 &nbsp;&nbsp;&nbsp;</div>
+        </div>
+    </div>
+</body>
+<script src="../js/jquery-3.4.1.min.js"></script>
+<script src="../js/bootstrap.min.js"></script>
+<script src="../js/swiper.min.js"></script>
+<script src="../js/toast.js"></script>
+<script src="../js/vue.js"></script>
+<script>
+    $(function(){
+        var now = new Date();
+		var nowday = now.getFullYear()+"-"+(now.getMonth()+1)+"-"+now.getDate();
+		var nextday = now.getFullYear()+"-"+(now.getMonth()+1)+"-"+(now.getDate()+1);
+		var nextnextday = now.getFullYear()+"-"+(now.getMonth()+1)+"-"+(now.getDate()+2);
+        // var nowday = "2020-6-13";
+        // var nextday = "2020-6-14";
+        // var nextnextday = "2020-6-15";
+
+        //设置当前日期
+        $('#nowdayone').html(nowday);
+        $('#swiper_tex').attr("value",nowday);
+        $('#nextdayone').html(nextday);
+        $('#nextdaytwo').html(nextnextday);
+
+        //获取当天日期放入隐藏域
+        var swiper = new Swiper('.swiper-container', {
+            nextButton : '.swiper-button-next',
+            prevButton : '.swiper-button-prev',
+            speed : 600,
+            onSlideChangeEnd : function(swiper) { // 触发slider切换的回调函数
+                var tex = $('.swiper-slide-active span').html();
+                $('#swiper_tex').attr("value",tex);
+                //选择完日期后调用场馆函数展示
+                findVenueByIdAndTime($('#myTab').find("li.active a"));
+            }
+        });
+
+        //页面加载场馆通知
+        var no_content="";
+        var topContent="";
+        $.ajax({
+            type: "GET",
+            url: "/user/findAllNotice",
+            success: function(data){
+                for(var i=0;i<7;i++){//href='user/getNotice?noticeId="+data[i].notice_Id+"'
+                    no_content+="<li><a onclick='getNotice(\""+data[i].notice_Id+"\")' ><span>"+data[i].notice_Title+"</span></a> <span class='pull-right text-color'>"+data[i].notice_Time+"</span></li>";
+                }
+                $('#noticeList').append(no_content);
+
+                topContent+="<a onclick='getNotice(\""+data[0].notice_Id+"\")' style='color: red;'>"+data[0].notice_Title+"</a>"
+                $('#topnotice').append(topContent);
+            },
+            dataType:"json"
+        });
+
+
+        //页面加载场馆类型
+        var liContent = "";//场馆名id='"+i+ball+"'
+        var divContent = "";//场馆的展示信息
+
+        $.ajax({
+            type: "GET",
+            url: "/user/findVenueType",
+            success: function(data){
+                for(var i = 0;i<data.length;i++){
+                    if(i==0){
+                        liContent+="<li class='active'><a href='#"+data[i].type_Name+"' id='"+data[i].type_Name+"' value='"+data[i].type_Name+"' data-toggle='tab' onclick='findVenueByIdAndTime(this)'>"+data[i].type_Name+"</a></li>";
+
+                        divContent+="<div role='tabpanel' class='tab-pane fade in active' id='"+data[i].type_Name+"'><div class='col-lg-6 tab_div1' >"
+                            +"<img src='../img/playground"+i+".jpg' class='tab_img'></div>"
+                            +"<div class='col-lg-6 tab_div2' ><p class='tab_p'>联系人: "+data[i].type_Linkman+"</p><p class='tab_p'>联系电话: 13856992553</p>"
+                            +"<p class='tab_p' >场地地址: "+data[i].type_Address+"</p><p class='tab_p tab_p_area' >"+data[i].type_Introduction+"</p></div></div>";
+                    }else{
+                        liContent+="<li><a href='#"+data[i].type_Name+"' value='"+data[i].type_Name+"' data-toggle='tab' onclick='findVenueByIdAndTime(this)'>"+data[i].type_Name+"</a></li>";
+
+                        divContent+="<div role='tabpanel' class='tab-pane fade' id='"+data[i].type_Name+"'><div class='col-lg-6 tab_div1' >"
+                            +"<img src='../img/playground"+i+".jpg' class='tab_img'></div>"
+                            +"<div class='col-lg-6 tab_div2' ><p class='tab_p'>联系人: "+data[i].type_Linkman+"</p><p class='tab_p'>联系电话: 13856992553</p>"
+                            +"<p class='tab_p' >场地地址: "+data[i].type_Address+"</p><p class='tab_p tab_p_area' >"+data[i].type_Introduction+"</p></div></div>";
+                    }
+                };
+                $("#myTab").append(liContent);
+                $("#message").append(divContent);
+                //通过document.getElementById('乒乓球场')来获得this 进入界面就调用函数
+                findVenueByIdAndTime(document.getElementById('乒乓球场'));
+            },
+            async: false,
+            dataType:"json"
+        });
+
+    });
+    //页面加载结束
+
+    //页面传递notice参数跳转
+    function getNotice(notice_id){
+        window.location.href="/user/notice?noticeId="+notice_id;
+    }
+
+    // 标签页
+    $('#myTab a').click(function(e) {
+        e.preventDefault();
+        $(this).tab('show');
+    });
+
+    //获得所有场馆
+    function findVenueByIdAndTime(id){
+        var currentDate = $('#swiper_tex').attr("value");
+        var venueName = $(id).text();
+
+        //判断当前是否存在表格tr，如果有就清空
+        var isdel = document. getElementsByClassName('del');
+        if(isdel){
+            $(".del").empty();
+        }
+
+        //获取当前日期和场馆类型的所有场馆信息
+        var venueContent = "";
+        $.ajax({
+            type: "GET",
+            url: "/user/findVenueList",
+            data: {currentDate:currentDate,venueName:venueName},
+            success: function(data){
+                for(var i = 0;i<data.length;i++){
+                    //获得分时状态 指定时间是9:00-19:00期间
+                    venueContent+="<tr class='first del'><td class='place'>"+data[i].gms_venue.venue_Name+"</td>";
+                    //获得分时状态字段
+                    var vdstate = data[i].vdstate_St;
+                    for(var j = 9;j<vdstate.length-4;j++){
+                        if(vdstate[j]==0){
+                            //表示当前场馆不可用
+                            venueContent+="<td><span id ="+data[i].gms_venue.venue_Name+j+" j_id ="+j+" class='gray' venue_id="+data[i].gms_venue.venue_Id+" venue_type="+data[i].gms_venue.venue_Type+" venue_name="+data[i].gms_venue.venue_Name+" vdstate_date="+data[i].vdstate_Date+" venue_price="+data[i].gms_venue.venue_Price+" ><img class='blank' src='../img/dui.png' /></span></td>";
+                        }else if(vdstate[j]==1){
+                            //表示当前场馆可用
+                            //判断当前的id和放入全局变量的id是否一样
+                            if((data[i].gms_venue.venue_Name+j+data[i].vdstate_Date)==state)
+                                venueContent+="<td><span id ="+data[i].gms_venue.venue_Name+j+data[i].vdstate_Date+" j_id ="+j+" class='green' venue_id="+data[i].gms_venue.venue_Id+" venue_type="+data[i].gms_venue.venue_Type+" venue_name="+data[i].gms_venue.venue_Name+" vdstate_date="+data[i].vdstate_Date+" venue_price="+data[i].gms_venue.venue_Price+"><img src='../img/dui.png' /></span></td>";
+                            else
+                                venueContent+="<td><span id ="+data[i].gms_venue.venue_Name+j+data[i].vdstate_Date+" j_id ="+j+" class='white' venue_id="+data[i].gms_venue.venue_Id+" venue_type="+data[i].gms_venue.venue_Type+" venue_name="+data[i].gms_venue.venue_Name+" vdstate_date="+data[i].vdstate_Date+" venue_price="+data[i].gms_venue.venue_Price+"><img class='blank' src='../img/dui.png' /></span></td>";
+                        }else{
+                            //表示当前场馆已被预约
+                            venueContent+="<td><span id ="+data[i].gms_venue.venue_Name+j+data[i].vdstate_Date+" j_id ="+j+" class='yellow' venue_id="+data[i].gms_venue.venue_Id+" venue_type="+data[i].gms_venue.venue_Type+" venue_name="+data[i].gms_venue.venue_Name+" vdstate_date="+data[i].vdstate_Date+" venue_price="+data[i].gms_venue.venue_Price+"><img class='blank' src='../img/dui.png' /></span></td>";
+                        }
+
+                    }
+                    venueContent+="</tr>";
+                }
+                $('#venue_data').append(venueContent);
+            },
+            async: false,
+            dataType:"json"
+        });
+
+    }
+
+    //设置计数变量
+    var count = 0;
+    //设置是否是绿色的状态
+    var state ="";
+
+    //订单属性
+    var venue_id = ""        //场馆编号
+    var venue_price = ""     //当前场馆的价格
+    var vdstate_date = ""    //场馆日期
+    var venue_name = ""      //场馆名
+    var venue_type = ""      //场馆类型
+    //开始结束时间
+    var stime = 0
+    var etime = 0
+
+    var a
+    var b
+    var c
+    var d
+    var e
+
+    $("table.firstTable").on("click",'td span',function(){
+        venue_id = $(this).attr('venue_id');
+        venue_name = $(this).attr('venue_name');
+        venue_type = $(this).attr('venue_type');
+        venue_price = $(this).attr('venue_price');
+        vdstate_date = $(this).attr('vdstate_date');
+        //当前的id  9-18     后面取消的时候传递id过来，id代表vdstate_st的第几位，把状态改为1  表示可用
+        var j_id = $(this).attr("j_id");
+
+        switch(parseInt(j_id)){
+            case 9  : stime = 9 ; etime = 10;break;
+            case 10 : stime = 10; etime = 11;break;
+            case 11 : stime = 11; etime = 12;break;
+            case 12 : stime = 12; etime = 13;break;
+            case 13 : stime = 13; etime = 14;break;
+            case 14 : stime = 14; etime = 15;break;
+            case 15 : stime = 15; etime = 16;break;
+            case 16 : stime = 16; etime = 17;break;
+            case 17 : stime = 17; etime = 18;break;
+            case 18 : stime = 18; etime = 19;break;
+            default : break;
+        }
+        //选择预约的场馆
+        if ($(this).attr('class') == 'green') {
+            $(this).find('img').addClass('blank');
+            $(this).removeClass('green');
+            $(this).addClass('white');
+            //清空加到隐藏域中的属性
+            //计数器减一
+            count--;
+            $('.secondTable').find('tr').each(function(i, o) {
+                if($(this).attr('id') == 'def'){
+                    $(this).remove();
+                }
+            })
+            //将加入的状态全部还原
+            venue_id = ""
+            venue_price = ""
+            vdstate_date = ""
+            venue_name = ""
+            venue_type = ""
+            stime = 0
+            etime = 0
+            state = "";
+        } else {
+            if(count==1){
+                showMessage('一次只能预约一个场地',2000,true,'bounceIn-hastrans','bounceOut-hastrans');
+                return ;
+            }
+
+            a = venue_price
+            b = vdstate_date
+            c = stime
+            d = etime
+            e = venue_id
+            if ($(this).attr('class') == "white") {
+                $(this).find('img').removeClass('blank');
+                $(this).removeClass('white');
+                $(this).addClass('green');
+
+                var tr = "<tr class='first' id='def' >" +
+                    "                            <td id='do_1'>"+venue_type+"</td>" +
+                    "                            <td id='do_1'>"+venue_name+"</td>" +
+                    "                            <td id='do_1'>"+vdstate_date+" "+stime+":00-"+etime+":00"+"</td>" +
+                    "                            <td id='do_1'>"+venue_price+"元"+"</td>" +
+                    "                        </tr>"
+                $('.secondTable').append(tr);
+                count++;
+                //给状态赋值 唯一值 （场馆名+id+日期）  和当前场馆类型
+                state = $(this).attr('id');
+            }
+        }
+    });
+
+
+    let app = new Vue({
+        el: '#app',
+        data: {
+            user_Id:""
+        },
+        mounted:function(){
+            this.getSession();//页面加载函数
+        },
+        methods: {
+            getSession: function(){
+                $.get("/user/getSession",function (data) {
+                    app.user_Id = data.user_Id
+                },"json");
+            },
+            loginOut: function () {
+                $.post("/user/logout",function (data) {
+                    window.location.href="/user/index";
+                },"json");
+            },
+            toCenter: function () {
+                window.location.href="/user/center";
+            },
+            toLogin:function () {
+                window.location.href="/user/login";
+            }
+        }
+    });
+
+    //提交预约订单
+    function submitIfExits(){
+        if(venue_id==""||venue_id==undefined){
+            showMessage('请选择您要预约的场馆',2000,true,'bounceIn-hastrans','bounceOut-hastrans');
+        }else{
+            if($('#session_user').text() == ""){
+                showMessage('请登录后再预约',2000,true,'bounceIn-hastrans','bounceOut-hastrans');
+            }else{
+                //异步提交订单
+                $.ajax({
+                    "async":false,
+                    "url":"/user/confirmOrder?venue_Id="+e,
+                    "type":"POST",
+                    "data":JSON.stringify({order_Price:a,order_Date:b,order_St:c,order_Ed:d}),
+                    "dataType":"json",
+                    "contentType":"application/json",
+                    "success":function(data){
+                        if (data.info=="ok"){
+                            showMessage('预约成功，即将跳转个人中心',1500,true,'bounceIn-hastrans','bounceOut-hastrans')
+                            setTimeout("window.location.href='/user/center'", 1500);
+                        } else{
+                            showMessage('预约失败，该场馆可能已被预约',3000,true,'bounceIn-hastrans','bounceOut-hastrans');
+                        }
+                    }
+                });
+            }
+        }
+    }
+
+</script>
+</html>

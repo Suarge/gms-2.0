@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="gms.cuit.mapper.AdminMapper">
+
+<!--    登录-->
+    <select id="loadUserByUsername" resultType="Gms_Admin">
+        select * from gms_admin where admin_username= #{username};
+    </select>
+<!--更新密码-->
+    <update id="updatePassword">
+        UPDATE gms_admin SET admin_password = #{newpassword} where admin_username = #{username};
+    </update>
+<!--总览-收入-->
+    <select id="getSummaryTodayOrderProfit" resultType="java.lang.Double">
+        SELECT COALESCE(SUM(order_price),0) FROM gms_order WHERE order_mktime BETWEEN
+				#{date_st} AND #{date_ed};
+    </select>
+<!--总览-订单数-->
+    <select id="getSummaryTodayOrderCount" resultType="java.lang.Integer">
+        SELECT COALESCE(COUNT(*),0) FROM gms_order WHERE order_mktime BETWEEN
+				#{date_st} AND #{date_ed};
+    </select>
+<!--场馆种类-->
+    <select id="queryVenueType" resultType="java.lang.Object">
+        select type_name from gms_type;
+    </select>
+<!--获取指定时间内指定场馆类型的订单数-->
+    <select id="getOrderCountByDateAndVen" resultType="java.lang.Integer">
+        SELECT COALESCE(COUNT(*),0) FROM gms_order,gms_venue WHERE gms_venue.venue_id=gms_order.order_venue_id
+				AND venue_type = #{catitemname}
+				AND order_mktime BETWEEN #{date_st} AND #{date_ed};
+    </select>
+<!--获取最近订单-->
+    <resultMap id="Gms_OrderResultMap" type="Gms_Order">
+        <id column="order_id" property="order_Id"></id>
+        <result column="order_date" property="order_Date"></result>
+        <result column="order_st" property="order_St"></result>
+        <result column="order_ed" property="order_Ed"></result>
+        <result column="order_state" property="order_State"></result>
+        <result column="order_mktime" property="order_Mktime"></result>
+        <result column="order_price" property="order_Price"></result>
+        <association property="order_Venue" javaType="Gms_Venue">
+            <id column="venue_id" property="venue_Id"></id>
+            <result column="venue_type" property="venue_Type"></result>
+            <result column="venue_name" property="venue_Name"></result>
+            <result column="venue_price" property="venue_Price"></result>
+            <result column="venue_capacity" property="venue_Capacity"></result>
+            <result column="venue_open" property="venue_Open"></result>
+            <result column="venue_close" property="venue_Close"></result>
+            <result column="venue_is_del" property="venue_IsDel"></result>
+        </association>
+        <association property="order_User" javaType="Gms_User">
+            <id column="user_id" property="user_Id"></id>
+<!--            <result column="user_password" property="user_Password"></result>-->
+            <result column="user_sex" property="user_Sex"></result>
+            <result column="user_age" property="user_Age"></result>
+            <result column="user_email" property="user_Email"></result>
+        </association>
+    </resultMap>
+
+    <select id="getLatestOrderList" resultMap="Gms_OrderResultMap">
+        SELECT * FROM gms_order,gms_venue,gms_user WHERE gms_user.user_id=gms_order.order_user_id
+        AND gms_order.order_venue_id=gms_venue.venue_id ORDER BY order_mktime DESC limit 0 , #{get_count};
+    </select>
+
+<!--获取包含指定关键字的场馆总数-->
+    <select id="getVenueTotalCountByKeyQuery" resultType="java.lang.Integer">
+        select COALESCE(count(*),0) from gms_venue where venue_is_del = 0 and venue_name like "%" #{query_key} "%";
+    </select>
+<!--获取包含指定关键字的某页场馆-->
+    <select id="queryVenueByKey" resultType="Gms_Venue">
+        select * from gms_venue where venue_is_del = 0 and venue_name like "%" #{query_key} "%"
+        order by venue_type desc limit #{index} , #{currentCount} ;
+    </select>
+<!--添加场馆-->
+    <insert id="addVenue" parameterType="Gms_Venue">
+        insert into gms_venue values(#{venue_Id},#{venue_Type},#{venue_Name},#{venue_Price},#{venue_Capacity},#{venue_Open},#{venue_Close},0);
+    </insert>
+<!--修改场馆-->
+    <update id="updateVenue" parameterType="Gms_Venue">
+        update gms_venue set venue_type=#{venue_Type},venue_name=#{venue_Name},venue_price=#{venue_Price},
+            venue_capacity=#{venue_Capacity},venue_open=#{venue_Open},venue_close=#{venue_Close} where venue_id=#{venue_Id};
+    </update>
+<!--删除场馆-->
+    <update id="delVenue" parameterType="Gms_Venue">
+        update gms_venue set venue_is_del = 1 where venue_id = #{venue_Id};
+    </update>
+<!--获取包含指定关键字的订单总数-->
+    <select id="getOrderTotalCountByKeyQuery" resultType="java.lang.Integer">
+        SELECT COALESCE(COUNT(*),0) FROM gms_order,gms_venue WHERE gms_order.order_venue_id=gms_venue.venue_id AND (order_user_id LIKE "%" #{query_key} "%"
+        OR venue_name LIKE "%" #{query_key} "%" OR venue_type LIKE "%" #{query_key} "%") ;
+    </select>
+<!--获取包含指定关键字的某页订单-->
+    <select id="queryOrderByKey" resultMap="Gms_OrderResultMap">
+        SELECT * FROM gms_order,gms_venue,gms_user WHERE gms_order.order_venue_id=gms_venue.venue_id AND gms_user.user_id=gms_order.order_user_id
+        AND (order_user_id LIKE "%" #{query_key} "%" OR venue_name LIKE "%" #{query_key} "%"
+        OR venue_type LIKE "%" #{query_key} "%")
+        <choose>
+            <when test='sortStatus == "1"'>ORDER BY order_date DESC</when>
+            <when test='sortStatus == "2"'> ORDER BY order_date </when>
+            <when test='sortStatus == "3"'> ORDER BY order_price DESC </when>
+            <when test='sortStatus == "4"'> ORDER BY order_price </when>
+            <when test='sortStatus == "5"'> ORDER BY order_mktime DESC </when>
+            <when test='sortStatus == "6"'> ORDER BY order_mktime </when>
+            <when test='sortStatus == "7"'> ORDER BY venue_type </when>
+        </choose>
+
+        limit #{index},#{currentCount};
+    </select>
+<!--获取包含指定关键字的通知总数-->
+    <select id="getNoticeTotalCountByKeyQuery" resultType="java.lang.Integer">
+        select COALESCE(count(*),0) from gms_notice where notice_state = 0 and notice_title like "%" #{query_key} "%";
+    </select>
+<!--获取包含指定关键字的某页通知-->
+    <select id="queryNoticeByKey" resultType="Gms_Notice">
+        select * from gms_notice where notice_state = 0 and notice_title like "%" #{query_key} "%"
+        order by notice_time desc limit #{index} , #{currentCount} ;
+    </select>
+<!--添加通知-->
+    <insert id="addNotice" parameterType="Gms_Notice">
+        insert into gms_notice values(#{notice_Id},#{notice_Time},#{notice_Man},#{notice_Content},#{notice_Title},0);
+    </insert>
+<!--修改通知-->
+    <update id="updateNotice" parameterType="Gms_Notice">
+        update gms_notice set notice_time=#{notice_Time},notice_man=#{notice_Man},notice_content=#{notice_Content},
+            notice_title=#{notice_Title},notice_state=0 where notice_id=#{notice_Id};
+    </update>
+<!--删除通知-->
+    <update id="delNotice" parameterType="Gms_Notice">
+        update gms_notice set notice_state = 1 where notice_id = #{notice_Id};
+    </update>
+<!--查询指定时间段,指定场馆/类别的订单收入-->
+    <select id="getOrderProfitByDateAndVenOrCat" resultType="java.lang.Double">
+        SELECT COALESCE(SUM(order_price),0) FROM gms_order,gms_venue WHERE gms_venue.venue_id=gms_order.order_venue_id
+		AND order_mktime BETWEEN #{date_st} AND #{date_ed}
+        <if test="ven_name != null"> AND venue_name = #{ven_name} </if>
+        <if test="cat_name != null"> AND venue_type = #{cat_name} </if>
+		;
+    </select>
+<!--查询指定条件的订单人数-->
+    <select id="getOrderCountByDateAndVenOrCatAndSexAndAge" resultType="java.lang.Integer">
+        SELECT COALESCE(COUNT(*),0) FROM gms_order,gms_venue,gms_user WHERE gms_venue.venue_id=gms_order.order_venue_id
+        AND gms_order.order_user_id=gms_user.user_id AND order_mktime BETWEEN #{date_st} AND #{date_ed}
+		<if test="ven_name != null"> AND venue_name = #{ven_name} </if>
+        <if test="cat_name != null"> AND venue_type = #{cat_name} </if>
+        <if test="sex != null"> AND user_sex = #{sex} </if>
+        <if test='age == "10"'> AND user_age &lt; '20' </if>
+        <if test='age == "20"'> AND user_age >= '20' AND user_age &lt; '29' </if>
+        <if test='age == "30"'> AND user_age >= '30' AND user_age &lt; '39' </if>
+        <if test='age == "40"'> AND user_age >= '40' AND user_age &lt; '49' </if>
+        <if test='age == "50"'> AND user_age >= '50' AND user_age &lt; '59' </if>
+        <if test='age == "60"'> AND user_age >= '60' </if>
+        ;
+    </select>
+<!--    定时任务 - 更新当前时间以前的订单状态-->
+<!--    三点只更新3点以前的订单,不更新3~4点的订单状态-->
+    <update id="updateOrderStateByTime" >
+        update gms_order set order_state=2 where order_state=0 and (order_date &lt; #{date} or (order_date = #{date}
+        and order_st &lt; #{hour} ));
+    </update>
+<!--    定时任务 - 获取当前日期的场馆订单状态-->
+    <select id="queryOrderStateByTime" resultType="Gms_Vdstate">
+        select * from gms_vdstate where vdstate_date = #{date};
+    </select>
+<!--    定时任务 - 更新当前日期的场馆订单状态-->
+    <update id="updateVdState" parameterType="Gms_Vdstate">
+        update gms_vdstate set vdstate_st= #{vdstate_St} where vdstate_id= #{vdstate_Id} and vdstate_date= #{vdstate_Date};
+    </update>
+</mapper>

@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="gms.cuit.mapper.UserMapper">
+    <!--查询场馆所有通知-->
+    <select id="findAllNotice" resultType="Gms_Notice">
+        select * from gms_notice where notice_state=0 order by notice_time desc
+    </select>
+    <!--查询场馆类别-->
+    <select id="findAllType" resultType="Gms_Type">
+        select * from gms_type
+    </select>
+    <!-- 通过日期和场馆名查询 -->
+    <resultMap id="Gms_VenueResultMap" type="Gms_Vdstate">
+        <result column="vdstate_date" property="vdstate_Date" />
+        <result column="vdstate_st" property="vdstate_St"/>
+        <association property="gms_venue" javaType="Gms_Venue">
+            <id column="venue_id" property="venue_Id"/>
+            <result column="venue_type" property="venue_Type"/>
+            <result column="venue_name" property="venue_Name"/>
+            <result column="venue_price" property="venue_Price"/>
+        </association>
+    </resultMap>
+    <select id="finAllVenueByTypeAndDate" resultMap="Gms_VenueResultMap">
+        select i.venue_id,i.venue_type,i.venue_name,i.venue_price,p.vdstate_date,vdstate_st
+        from gms_venue i,gms_vdstate p
+        where i.venue_id= p.vdstate_id and i.venue_Type=#{venueName}
+        and p.vdstate_Date=#{currentDate}
+    </select>
+
+    <!--根据场馆id获取场馆信息-->
+    <select id="findVenueById" resultType="Gms_Venue">
+        select * from gms_venue where venue_id = #{id}
+    </select>
+
+    <!--根据noticeid查询通知消息-->
+    <select id="getNoticeById" resultType="Gms_Notice">
+        select * from gms_notice where notice_id = #{noticeId}
+    </select>
+    <!-- 获取当前场馆状态(可预约和已被预约) -->
+    <select id="getOrderState" resultType="java.lang.Integer">
+        SELECT order_state FROM `gms_order`
+        WHERE order_venue_id = #{Venue_Id}
+            and order_date = #{date}
+            and order_st = #{st}
+            and order_ed= #{ed}
+            and order_state &lt;&gt; 1
+    </select>
+
+    <!--获取分时状态-->
+    <select id="findVdstate" resultType="Gms_Vdstate">
+        select * from gms_vdstate where vdstate_id=#{venue_id} and vdstate_date=#{date}
+    </select>
+
+    <!--保存修改场馆分时状态-->
+    <update id="saveVdstate" parameterType="Gms_Vdstate">
+        update gms_vdstate
+        set vdstate_st=#{vdstate}
+        where vdstate_id=#{venue_Id} and vdstate_date=#{date}
+    </update>
+
+    <!--插入订单-->
+    <insert id="addOrder" parameterType="Gms_Order" >
+        insert into gms_order values(#{order_Id},#{order_Venue.venue_Id},#{order_User.user_Id},#{order_Date},#{order_St},#{order_Ed},#{order_State},#{order_Mktime},#{order_Price})
+    </insert>
+
+<!-- ####################################### -->
+
+    <!--获取订单个数-->
+    <select id="getCount" resultType="java.lang.Integer">
+        select COALESCE(count(*),0)
+        from gms_order i,gms_venue p
+        where i.order_venue_id= p.venue_id
+            and i.order_user_id=#{user_Id}
+            and (p.venue_type LIKE binary "%" #{query_key} "%" or p.venue_name LIKE binary "%" #{query_key} "%"  or i.order_id LIKE binary "%" #{query_key} "%" or i.order_date LIKE binary "%" #{query_key} "%" or i.order_mktime LIKE binary "%" #{query_key} "%" or i.order_price LIKE binary "%" #{query_key} "%")
+    </select>
+
+    <!--获取包含指定关键字的某页订单-->
+    <resultMap id="Gms_OrderResultMap" type="Gms_Order">
+        <id column="order_id" property="order_Id"></id>
+        <result column="order_date" property="order_Date"></result>
+        <result column="order_st" property="order_St"></result>
+        <result column="order_ed" property="order_Ed"></result>
+        <result column="order_state" property="order_State"></result>
+        <result column="order_mktime" property="order_Mktime"></result>
+        <result column="order_price" property="order_Price"></result>
+        <association property="order_Venue" javaType="Gms_Venue">
+            <id column="venue_id" property="venue_Id"></id>
+            <result column="venue_type" property="venue_Type"></result>
+            <result column="venue_name" property="venue_Name"></result>
+            <result column="venue_price" property="venue_Price"></result>
+            <result column="venue_capacity" property="venue_Capacity"></result>
+            <result column="venue_open" property="venue_Open"></result>
+            <result column="venue_close" property="venue_Close"></result>
+            <result column="venue_is_del" property="venue_IsDel"></result>
+        </association>
+    </resultMap>
+    <select id="findProductByPage" resultMap="Gms_OrderResultMap">
+        select * from gms_order i,gms_venue p
+        where i.order_venue_id= p.venue_id
+            and i.order_user_id=#{user_Id}
+            and (p.venue_type LIKE binary "%" #{query_key} "%" or p.venue_name LIKE binary "%" #{query_key} "%"  or i.order_id LIKE binary "%" #{query_key} "%" or i.order_date LIKE binary "%" #{query_key} "%" or i.order_mktime LIKE binary "%" #{query_key} "%" or i.order_price LIKE binary "%" #{query_key} "%")
+            order by order_mktime desc, order_date desc  limit #{index},#{currentCount}
+    </select>
+    <!--通过id修改订单状态-->
+    <update id="delOrderById" >
+        update gms_order set order_state=1 where order_id=#{id}
+    </update>
+
+<!--  ###########################################  -->
+    <!-- 用户登录-->
+    <select id="doLogin" resultType="Gms_User">
+        select * from gms_user where user_id=#{id} and user_password=#{password}
+    </select>
+    <!--修改密码-->
+    <update id="updatePassword">
+        UPDATE gms_user SET user_password = #{newpassword} where user_id = #{user_id}
+    </update>
+    <!--用户注册-->
+    <insert id="register" parameterType="Gms_User">
+        insert into gms_user values(#{user_Id},#{user_Password},#{user_Sex},#{user_Age},#{user_Email})
+    </insert>
+
+    <!--jmeter测试用根据id获取用户 -->
+    <select id="finUserById" resultType="Gms_User">
+        select * from gms_user where user_id=#{id}
+    </select>
+</mapper>

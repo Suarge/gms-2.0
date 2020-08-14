@@ -1,0 +1,17 @@
+{
+  "date_st":"2020-04-20 10:00",
+  "date_ed":"2020-05-20 12:00",
+  "category":"venue",
+  "list":[
+    {"analytics_Name":"羽毛球馆1","analytics_Profit":"199.0","analytics_Rent":"21","analytics_Usage":"70.0%",
+    "analytics_Sexpercentage":"20 30","analytics_Agepercentage":"11 2 3 4 5 6"},
+    {"analytics_Name":"羽毛球馆2","analytics_Profit":"299.0","analytics_Rent":"31","analytics_Usage":"80.0%",
+      "analytics_Sexpercentage":"60 30","analytics_Agepercentage":"21 2 3 4 5 6"},
+    {"analytics_Name":"羽毛球馆3","analytics_Profit":"399.0","analytics_Rent":"41","analytics_Usage":"50.0%",
+      "analytics_Sexpercentage":"50 30","analytics_Agepercentage":"1 21 3 4 5 6"},
+    {"analytics_Name":"羽毛球馆4","analytics_Profit":"499.0","analytics_Rent":"51","analytics_Usage":"60.0%",
+      "analytics_Sexpercentage":"40 30","analytics_Agepercentage":"1 2 32 4 5 6"},
+    {"analytics_Name":"羽毛球馆5","analytics_Profit":"599.0","analytics_Rent":"61","analytics_Usage":"40.0%",
+      "analytics_Sexpercentage":"30 30","analytics_Agepercentage":"1 2 3 42 5 6"}
+  ]
+}

@@ -1,0 +1,46 @@
+.widget-area-2 {
+    background: #fff;
+    margin-top: 20px;
+    padding: 20px;
+    padding-bottom: 2px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+.lorvens-box-shadow {
+    border-radius: 0;
+    border: 0;
+    -webkit-box-shadow: 0 0px 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0px 10px rgba(0, 0, 0, 0.1);
+    background: #fff;
+    margin-top: 20px;
+}
+.min-h{
+    min-height: 0px;
+}
+.widget-title {
+    color:#000;
+}
+.widget-title {
+    font-size: 18px;
+    padding-bottom: .5rem;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #eeeeee;
+}
+.t_right{
+    text-align:right
+}
+.t_sub{
+    margin-right: 15px;
+    border-radius: 200px;
+}
+.btn-default {
+    color: #337ab7;
+    background-color: #fff;
+    border-color: #ccc;
+}
+.top-notice{
+    margin-top: 3px;  
+    padding: 10px 0; 
+    padding-left: 15px;
+    margin-top: 35px;
+}

@@ -1,0 +1,520 @@
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>个人中心</title>
+<!--<link rel="stylesheet" href="../css/toast.css">-->
+<link rel="stylesheet" href="../css/bootstrap.min.css">
+<link rel="stylesheet" href="../css/toastr.min.css">
+<link rel="stylesheet" href="../css/SMS-index.css" />
+<link rel="stylesheet" href="../css/personal.css">
+<link rel="stylesheet" href="../css/orderlist.css">
+</head>
+<body>
+	<!--引入头部-->
+	<div id="center_vue">
+		<div class="header">
+			<div class="real_header">
+				<a href="#" style="text-decoration: none; color: #337ab7;"> <img
+					src="../img/logo.png" class="head_img"> <span class="head_span1">体育馆场地管理系统</span>
+				</a>
+				<div class="login">
+					<div>
+						<a href="javascript:void(0);" v-on:click="toIndex" style="margin-left: -60px;">首页</a>
+					</div>
+					<div class="dropdown nav navbar-nav navbar-right" style="margin-top: -22px; margin-right: 3px;">
+						<a href="" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+							<i class="glyphicon glyphicon-user"></i> 用户设置
+						</a>
+						<ul class="dropdown-menu " aria-labelledby="dropdownMenu1">
+							<li>
+								<!-- 引入修改密码模态框 -->
+								<a href="" data-toggle="modal" data-target="#updateModal" data-whatever="@mdo">
+									<i class="glyphicon glyphicon-pencil"></i> 修改密码
+								</a>
+							</li>
+							<li role="separator" class="divider"></li>
+							<li>
+								<a v-on:click="loginOut"> <i class="glyphicon glyphicon-off"></i>
+									注销登录
+								</a>
+							</li>
+						</ul>
+					</div>
+				</div>
+			</div>
+			<div class="top_line"></div>
+			<div class="message">
+				<p
+					style="width: 1000px; margin: 0 auto; height: 30px; line-height: 30px;">
+<!--					<img style="margin-left: -6px;" src="">&lt;!&ndash;../img/laba.png&ndash;&gt;-->
+<!--					<span>通知：<a href="../order?method=viewNotice&noticeId=${noticelist[0].notice_Id }" style="color: red;">${noticelist[0].notice_Title }</a></span>-->
+				</p>
+			</div>
+		</div>
+
+		<!-- 大展示框 -->
+		<div class="container">
+			<!-- 订单详情界面 -->
+			<div class="col-lg-12"
+				style="background-color: white; height: 540px;margin-top:50px">
+				<div class="col-md-12">
+					<div class="widget-area-2 lorvens-box-shadow">
+						<!-- <h2 class="widget-title">我 的 预 约</h2> -->
+						<div class="row">
+							<div class="col-sm-10">
+								<form class="navbar-form navbar-left">
+									<span>关键字搜索： </span>
+									<div class="form-group">
+										<input type="text" class="form-control" id="query_key" name="query_key" v-model="query_key">
+									</div>
+									<button type="button" class="btn btn-default " @click="currentPage=1,changePage()">查询</button>
+								</form>
+							</div>
+							<div class="col-sm-2" style="padding-top:15px;">
+								<button style="margin-left: 6px;" type="button" v-on:click="export_order"
+								class="preadd-btn btn btn-warning btn-sm">导出数据</button>
+							</div>
+						</div>
+
+						<table class="table table-hover">
+							<thead >
+								<tr>
+									<th>序号</th>
+									<th>订单号</th>
+									<th>预约场馆</th>
+									<th>预约时间</th>
+									<th>订单生成时间</th>
+									<th>价格</th>
+									<th>状态</th>
+									<th>操作</th>
+								</tr>
+							</thead>
+
+							<tbody>
+								 <tr v-for="(order,index) in list">
+									<td>{{index+1+currentCount*currentPage-currentCount}}</td>
+									<td>{{order.order_Id}}</td>
+									<td><a tabindex="0" style="text-decoration:none;" role="button" data-toggle="popover" data-html="true" data-trigger="focus" title="场地详细信息" data-container="body"
+										:data-content="getItem(order.order_Venue.venue_Type,order.order_Venue.venue_Capacity,order.order_Venue.venue_Open,order.order_Venue.venue_Close)">{{order.order_Venue.venue_Name}}</a>
+									</td>
+									<td>{{order.order_Date}} {{order.order_St}}:00-{{order.order_Ed}}:00</td>
+									<td>{{order.order_Mktime}}</td>
+									<td>{{order.order_Price }}</td>
+									<td v-if="order.order_State==0"><button  type="button" class="btn btn-warning btn-sm sh sw">进行中</button></td>
+									<td v-if="order.order_State==0" style="padding-left:0px;"><button type="button" class="btn btn-danger btn-sm sh" v-on:click="delOrder(order.order_Id,order.order_Date,order.order_Venue.venue_Id,order.order_St)">取消</button></td>
+									<td v-if="order.order_State==1"><button  type="button" class="btn btn btn-info btn-sm sh sw">已取消</button></td>
+									<td v-if="order.order_State==1"><i class="glyphicon glyphicon-minus" style="color:red;font-size:18px;padding-left:3px"></i></td>
+									<td v-if="order.order_State==2"><button  type="button" class="btn btn-success btn-sm sh sw">已完成</button></td>
+									<td v-if="order.order_State==2"><i class="glyphicon glyphicon-minus" style="color:red;font-size:18px;padding-left:3px"></i></td>
+								</tr>
+							</tbody>
+
+						</table>
+						<!-- 分页 -->
+
+						<div class="row" style="margin: 0 auto; margin-top: 30px;">
+							<div style="text-align: center; margin-top: 10px;">
+								<nav aria-label="Page navigation">
+									<ul class="pagination ">
+									 	<!-- 判断当前页是否是第一页 -->
+										<li v-if="currentPage==1">
+											<a href="javascript:void(0);" aria-label="Previous">
+												<span  aria-hidden="true">&laquo;</span>
+											</a>
+										</li>
+										<li v-else>
+											<a href="javascript:void(0);" v-on:click="currentPage--,changePage()" aria-label="Previous" >
+												<span  aria-hidden="true">&laquo;</span>
+											</a>
+										</li>
+										<!-- 判断当前页 -->
+										<li v-for="index in indexs" v-bind:class="{'active':index == currentPage}">
+											<a v-on:click="currentPage=index,changePage()">{{index}}</a>
+										</li>
+										 <!-- 判断当前页是否是最后一页 -->
+										<li v-if="currentPage==totalPage">
+											<a href="javascript:void(0);" aria-label="Next">
+												<span aria-hidden="true">&raquo;</span>
+											</a>
+										</li>
+										<li v-else>
+											<a href="javascript:void(0);" @click="currentPage++,changePage()" aria-label="Next">
+													<span aria-hidden="true">&raquo;</span>
+												</a>
+										</li>
+									</ul>
+								</nav>
+							</div>
+
+						</div>
+						<!-- 分页结束 -->
+					</div>
+				</div>
+
+			</div>
+
+		</div>
+	</div>
+
+	<!-- 修改密码模态框 -->
+	<div class="modal fade" id="updateModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+					<h4 class="modal-title" id="exampleModalLabel">修改密码</h4>
+				</div>
+				<div class="modal-body">
+					<!-- 修改表单 -->
+					<form id="user_update" action="../user?method=updatePassword" method="POST">
+						<div class="form-group">
+							<label class="control-label">修改密码:</label>
+							<input type="password" name="newpassword" class="form-control" id="newpassword">
+						</div>
+						<div class="form-group">
+							<label class="control-label">确认密码:</label>
+							<input type="password" name="repassword" class="form-control" id="repassword">
+						</div>
+					</form>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+					<button type="button" class="btn btn-primary submit_update_password">确认修改</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- 界面页尾 -->
+	<div class="container-fluid footer">
+		<div class="row">
+			<!--<div style="border:solid ;color: #EC971F"></div>-->
+			<div class="footer" style="position: relative;">
+				版权所有©GMS-体育馆场地管理系统 &nbsp;&nbsp;&nbsp;</div>
+		</div>
+	</div>
+</body>
+
+<script src="../js/jquery-3.4.1.min.js"></script>
+<script src="../js/bootstrap.min.js"></script>
+<script src="../js/md5.js"></script>
+<script src="../js/toast.js"></script>
+<script src="../js/toastr.min.js"></script>
+<script src="../js/vue.js"></script>
+<script>
+	let center_vue;
+	$(function () {
+		// 设置操作结果提示的位置和展示时间
+		toastr.options.positionClass = 'toast-center-center';
+		toastr.options.timeOut = 1200;
+
+		$.ajax({
+			type: "POST",
+			url: "/user/getOrder",
+			dataType: "json",
+			data: JSON.stringify({"query_key":"", "currentPage" : "1"}),
+			contentType: "application/json",
+			async: false,
+			success: function (data) {
+				center_vue = new Vue({
+					el:'#center_vue',
+					data:{
+						user:"",
+						query_key : data.query_key,
+						currentPage : data.currentPage,
+						currentCount : data.currentCount,//这里后台写死了，可以传过去或者页面修改
+						totalCount : data.totalCount,
+						totalPage : data.totalPage,
+						list : data.list
+					},
+					mounted:function(){
+						this.getSession();//页面加载获取用户id
+					},
+					computed:{
+						indexs: function () {
+							var len = this.totalPage;
+							var ar = [];
+							for(var i=0;i<len;i++){
+								ar[i] = i+1;
+							}
+							return ar;
+						}
+					},
+					methods: {
+						getSession: function(){
+							$.get("/user/getSession",function (data) {
+								center_vue.user_Id = data.user_Id
+							},"json");
+						},
+						changePage: function(){
+							$.ajax({
+								type: "POST",
+								url: "/user/getOrder",
+								dataType: "json",
+								data: JSON.stringify({"query_key":center_vue.query_key, "currentPage" : center_vue.currentPage}),
+								contentType: "application/json",
+								async: false,
+								success: function (data) {
+									center_vue.query_key = data.query_key
+									center_vue.currentPage = data.currentPage
+									center_vue.currentCount = data.currentCount
+									center_vue.totalCount = data.totalCount
+									center_vue.totalPage = data.totalPage
+									center_vue.list = data.list
+								}
+							});
+						},
+						getItem: function(venue_Type,venue_Capacity,venue_Open,venue_Close){
+							return "场馆类别 : "+venue_Type+"<br/>接待能力 : "+venue_Capacity+"人<br/>开放时间 : "+venue_Open+":00<br/>关闭时间 : "+venue_Close+":00"
+						},
+						delOrder: function(orderId,orderDate,venueId,orderSt){
+							//当前时间大小
+							var now = new Date();
+							var nowday = now.getFullYear()+"-"+(now.getMonth()+1)+"-"+now.getDate();//2019-12-5
+							var hours = now.getHours();
+							var minutes = now.getMinutes();
+							var seconds = now.getSeconds();
+
+							var nowtime = nowday+" "+hours+":"+minutes+":"+seconds;
+
+							orderAllDate = orderDate+" "+orderSt+":00:00";//${order.order_Date} ${order.order_St}:00:00
+							var orderDateTime = new Date(orderAllDate.replace(/-/g,'/')).getTime();
+							var nowtimeTime = new Date(nowtime.replace(/-/g,'/')).getTime();
+
+							if(orderDateTime-nowtimeTime>=6*60*60*1000){
+								Ewin.confirm({ message: "您确认要取消预约吗？" }).on(function (e) {
+									if (e) {
+										$.ajax({
+											type: "POST",
+											url: "/user/delOrder",
+											dataType: "json",
+											data: JSON.stringify({
+												"orderId": orderId,
+												"orderDate": orderDate,
+												"venueId": venueId,
+												"orderSt": orderSt
+											}),
+											contentType: "application/json",
+											success: function (data) {
+												if(data.info=="ok"){
+													window.location.href="/user/center";
+												}
+											}
+										});
+									}
+								});
+							}else{
+								//alert("请提前六小时取消预约")
+								//showMessage('请提前六小时取消预约', 2000, true, 'bounceIn-hastrans', 'bounceOut-hastrans');
+								toastr.error("请提前六小时取消预约");
+							}
+						},
+						export_order: function(){
+							window.location.href="/user/export_order";
+						},
+						toIndex:function () {
+							window.location.href="/user/index";
+						},
+						loginOut: function () {
+							$.post("/user/logout",function (data) {
+								window.location.href="/user/index";
+							},"json");
+						},
+					}
+				});
+			}
+		});
+		$('[data-toggle="popover"]').popover();
+	});
+
+	 //修改密码
+	 $("body").on("click", ".submit_update_password",function(e){
+			if($('#newpassword').val().trim()==''){
+				showMessage('新密码不能为空',2000,true,'bounceIn-hastrans','bounceOut-hastrans');
+			}
+			else if($('#newpassword').val().trim()!=$('#repassword').val().trim()){
+				//toastr.warning('两次填写密码不一致');
+				showMessage('两次填写密码不一致',2000,true,'bounceIn-hastrans','bounceOut-hastrans');
+			}
+			// else if(md5($('#prepassword').val().trim())!="${user.user_Password}"){
+			// 	//toastr.error('原密码填写错误');
+			// 	showMessage('原密码填写错误',2000,true,'bounceIn-hastrans','bounceOut-hastrans');
+			// }
+			else{
+				$.ajax({
+					type: 'POST', url: "/user/updatePassword", dataType: "json",
+					data: JSON.stringify({"username":center_vue.user_Id,"newpassword":$('#newpassword').val().trim()}),
+					contentType : "application/json",
+					success: function(data) {
+						$.post("/user/logout",function (data) {
+							window.location.href="/user/login";
+						},"json");
+					}
+				});
+			}
+	  });
+
+
+	//引入的confirm
+	(function ($) {
+		 window.Ewin = function () {
+		 var html = '<div id="[Id]" class="modal fade" role="dialog" aria-labelledby="modalLabel">' +
+		  '<div class="modal-dialog modal-sm">' +
+		   '<div class="modal-content">' +
+		   '<div class="modal-header">' +
+		   '<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>' +
+		   '<h4 class="modal-title" id="modalLabel">[Title]</h4>' +
+		   '</div>' +
+		   '<div class="modal-body">' +
+		   '<p>[Message]</p>' +
+		   '</div>' +
+		   '<div class="modal-footer">' +
+		 '<button type="button" class="btn btn-default cancel" data-dismiss="modal">[BtnCancel]</button>' +
+		 '<button type="button" class="btn btn-primary ok" data-dismiss="modal">[BtnOk]</button>' +
+		 '</div>' +
+		   '</div>' +
+		  '</div>' +
+		  '</div>';
+		 
+		 
+		 var dialogdHtml = '<div id="[Id]" class="modal fade" role="dialog" aria-labelledby="modalLabel">' +
+		  '<div class="modal-dialog">' +
+		   '<div class="modal-content">' +
+		   '<div class="modal-header">' +
+		   '<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>' +
+		   '<h4 class="modal-title" id="modalLabel">[Title]</h4>' +
+		   '</div>' +
+		   '<div class="modal-body">' +
+		   '</div>' +
+		   '</div>' +
+		  '</div>' +
+		  '</div>';
+		 var reg = new RegExp("\\[([^\\[\\]]*?)\\]", 'igm');
+		 var generateId = function () {
+		 var date = new Date();
+		 return 'mdl' + date.valueOf();
+		 }
+		 var init = function (options) {
+		 options = $.extend({}, {
+		 title: "操作提示",
+		 message: "提示内容",
+		 btnok: "确定",
+		 btncl: "取消",
+		 width: 200,
+		 auto: false
+		 }, options || {});
+		 var modalId = generateId();
+		 var content = html.replace(reg, function (node, key) {
+		 return {
+		  Id: modalId,
+		  Title: options.title,
+		  Message: options.message,
+		  BtnOk: options.btnok,
+		  BtnCancel: options.btncl
+		 }[key];
+		 });
+		 $('body').append(content);
+		 $('#' + modalId).modal({
+		 width: options.width,
+		 backdrop: 'static'
+		 });
+		 $('#' + modalId).on('hide.bs.modal', function (e) {
+		 $('body').find('#' + modalId).remove();
+		 });
+		 return modalId;
+		 }
+		 
+		 return {
+		 alert: function (options) {
+		 if (typeof options == 'string') {
+		  options = {
+		  message: options
+		  };
+		 }
+		 var id = init(options);
+		 var modal = $('#' + id);
+		 modal.find('.ok').removeClass('btn-success').addClass('btn-primary');
+		 modal.find('.cancel').hide();
+		 
+		 return {
+		  id: id,
+		  on: function (callback) {
+		  if (callback && callback instanceof Function) {
+		  modal.find('.ok').click(function () { callback(true); });
+		  }
+		  },
+		  hide: function (callback) {
+		  if (callback && callback instanceof Function) {
+		  modal.on('hide.bs.modal', function (e) {
+		  callback(e);
+		  });
+		  }
+		  }
+		 };
+		 },
+		 confirm: function (options) {
+		 var id = init(options);
+		 var modal = $('#' + id);
+		 modal.find('.ok').removeClass('btn-primary').addClass('btn-success');
+		 modal.find('.cancel').show();
+		 return {
+		  id: id,
+		  on: function (callback) {
+		  if (callback && callback instanceof Function) {
+		  modal.find('.ok').click(function () { callback(true); });
+		  modal.find('.cancel').click(function () { callback(false); });
+		  }
+		  },
+		  hide: function (callback) {
+		  if (callback && callback instanceof Function) {
+		  modal.on('hide.bs.modal', function (e) {
+		  callback(e);
+		  });
+		  }
+		  }
+		 };
+		 },
+		 dialog: function (options) {
+		 options = $.extend({}, {
+		  title: 'title',
+		  url: '',
+		  width: 800,
+		  height: 550,
+		  onReady: function () { },
+		  onShown: function (e) { }
+		 }, options || {});
+		 var modalId = generateId();
+		 
+		 var content = dialogdHtml.replace(reg, function (node, key) {
+		  return {
+		  Id: modalId,
+		  Title: options.title
+		  }[key];
+		 });
+		 $('body').append(content);
+		 var target = $('#' + modalId);
+		 target.find('.modal-body').load(options.url);
+		 if (options.onReady())
+		  options.onReady.call(target);
+		 target.modal();
+		 target.on('shown.bs.modal', function (e) {
+		  if (options.onReady(e))
+		  options.onReady.call(target, e);
+		 });
+		 target.on('hide.bs.modal', function (e) {
+		  $('body').find(target).remove();
+		 });
+		 }
+		 }
+		 }();
+		})(jQuery);
+
+
+
+</script>
+</body>
+</html>

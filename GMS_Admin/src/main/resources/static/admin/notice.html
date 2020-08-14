@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <title>bck_notice</title>
+    <style>
+        html { overflow-x:hidden; }
+        .table {
+            margin-left: 10px;
+        }
+
+        /* 清除面板边框 */
+        .panel-default {
+            border: 0px;
+        }
+
+        /* 控制面板间距 */
+        .panel-body {
+            margin: 0px 10px;
+            width: 1410px;
+        }
+
+        /* 设置按钮间距 */
+        .bt2 {
+            margin-left: 10px;
+        }
+
+        /* 表单1调整 */
+        .form1-tx {
+            width: 50%;
+        }
+
+        .form1-bt {
+            height: 26px;
+        }
+
+        /* 设置发布通知按钮间距 */
+        .preadd-btn {
+            margin-left: 25px;
+        }
+
+        table tbody tr td:last-of-type {
+            width: 120px;
+            border-bottom: 1px solid;
+            border-color: #e3e3e3;
+        }
+    </style>
+ 
+</head>
+
+<body>
+    <div class="panel panel-default" id="notice_vue">
+        <div class="panel-body container">
+            <div class="row">
+                <div class="col-sm-4">
+                    <form id="query_notice">
+                        <span>关键字查询:</span>
+                        <input type="text" class="form1-tx" id="query_key" name="query_key" v-model="query_key">
+                        <input type="button" class="form1-bt btn btn-sm btn-primary" value="查询" @click="currentPage=1,change()">
+                    </form>
+                </div>
+                <div class="col-sm-3"></div>
+                <div class="col-sm-2">
+                    <button type="button" onclick="openadd_notice_Modal()"
+                        class="preadd-btn btn btn-success btn-sm">发布新通知</button>
+                </div>
+                <div class="col-sm-2" style="padding-left: 30px;">
+                    <button type="button" onclick="export_notice()"
+                        class="preadd-btn btn btn-warning btn-sm">导出数据</button>
+                </div>
+            </div>
+        </div>
+        <!-- Table -->
+        <table class="table table-hover" style="table-layout:fixed;">
+            <thead>
+                <tr>
+                    <th style="width:5%;">#</th>
+                    <th style="width:10%;">通知人</th>
+                    <th style="width:25%;">通知标题</th>
+                    <th style="width:35%;">通知内容</th>
+                    <th style="width:10%;">通知日期</th>
+                    <th style="width:14%;"></th>
+                </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(notice,index) in list">
+                <th scope="row">{{index+1+currentCount*currentPage-currentCount}}</th>
+                <td>{{notice.notice_Man}}</td>
+                <td>{{notice.notice_Title}}</td>
+                <td style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;" :title="getNoticeContent(notice.notice_Content)">{{notice.notice_Content}}</td>
+                <td>{{notice.notice_Time}}</td>
+                <td>
+                  <button type="button" class="bt1 btn btn-info btn-xs" @click="openupdate_notice_Modal(notice.notice_Id,notice.notice_Man,
+                  notice.notice_Title,notice.notice_Content,notice.notice_Time)">修改</button>
+                  <button type="button" @click="opendel_notice_Modal(notice.notice_Id)"
+                      class="bt2 btn btn-danger btn-xs">删除</button>
+                </td>
+              </tr>
+            </tbody>
+        </table>
+        <div class="container" style="width: 1410px;">
+          <div class="row">
+              <div class="col-sm-7" style="margin-top:23px;">
+                  <div class="row">
+                      <div class="col-sm-5" style="padding-right: 0px; width:300px">
+                          <span style="font-size: 20px;">当前总共有{{totalCount}}条数据,每页显示</span>
+                      </div>
+                      <div class="col-sm-2" style="padding-left: 10px;padding-right:0px; width:55px;">
+                          <div class="dropdown showpagenum">
+                              <button class="btn btn-default dropdown-toggle" style="height: 27px; padding-top:3px;"
+                                  type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true"
+                                  aria-expanded="true">
+                                  <span style="display:inline-block;width:11px;">{{currentCount}}</span>
+                                  <span class="caret" style="margin-left: 3px;"></span>
+                              </button>
+                              <ul class="dropdown-menu" aria-labelledby="dropdownMenu1"
+                                  style="min-width: 41px;overflow:visible;">
+                                  <li><a href="javascript:void(0);" @click="currentCount=5,change()"
+                                          style="padding-left:14px;">5</a></li>
+                                  <li><a href="javascript:void(0);" @click="currentCount=7,change()"
+                                          style="padding-left:14px;">7</a></li>
+                                  <li><a href="javascript:void(0);" @click="currentCount=10,change()"
+                                          style="padding-left:14px;">10</a></li>
+                                  <li><a href="javascript:void(0);" @click="currentCount=15,change()"
+                                          style="padding-left:14px;">15</a></li>
+                                  <li><a href="javascript:void(0);" @click="currentCount=20,change()"
+                                          style="padding-left:14px;">20</a></li>
+                              </ul>
+                          </div>
+                      </div>
+                      <div class="col-sm-4" style="padding-left: 20px;">
+                          <span style="font-size: 20px;">条数据</span>
+                      </div>
+                  </div>
+              </div>
+              <div class="col-sm-5" style="margin-left:-60px;">
+                  <nav aria-label="Page navigation">
+                      <ul class="pagination">                       
+              <!-- 判断当前页是否是第一页 -->
+								<li v-if="currentPage==1" class="disabled">
+									<a href="javascript:void(0);" aria-label="Previous">
+										<span aria-hidden="true">&laquo;</span>
+									</a>
+								</li>
+								<li v-else>
+									<a href="javascript:void(0);" @click="currentPage--,change()" aria-label="Previous">
+										<span aria-hidden="true">&laquo;</span>
+									</a>
+                </li>
+
+                <li v-for="index in indexs" v-bind:class="{'active':index == currentPage}">
+                  <a @click="currentPage=index,change()">{{index}}</a>
+                </li>
+				      <!-- 判断当前页是否是最后一页 -->
+								<li v-if="currentPage==totalPage" class="disabled">
+									<a href="javascript:void(0);" aria-label="Next"> 
+										<span aria-hidden="true">&raquo;</span>
+									</a>
+								</li>
+								<li v-else>
+									<a href="javascript:void(0);" @click="currentPage++,change()" aria-label="Next"> 
+										<span aria-hidden="true">&raquo;</span>
+									</a>
+                </li>
+                <li>
+                  <a href="javascript:void(0);">共{{totalPage}}页</a>
+                </li>
+                        </ul>
+                    </nav>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</body>
+<script src="../js/jquery-3.4.1.min.js"></script>
+<script src="../js/bootstrap.min.js"></script>
+<script src="../js/vue.js"></script>
+ <script type="text/javascript">
+  //全局vue
+  let notice_vue;
+  $(function () {
+    $.ajax({ type: "POST", url: "/admin/getNotice", dataType: "json",
+      data:JSON.stringify({"query_key":"","currentPage":"1","currentCount":"5"}), contentType : "application/json",
+      success: function(data) {
+      notice_vue = new Vue({
+        el:'#notice_vue',
+        data:{
+          query_key:data.query_key,
+          currentPage:data.currentPage,
+          currentCount:data.currentCount,
+          totalCount:data.totalCount,
+          totalPage:data.totalPage,
+          list:data.list
+        },
+        computed:{
+          indexs: function(){
+            var left = 1;
+            var right = this.totalPage;
+            var ar = [];
+            if(this.totalPage>= 5){
+              if(this.currentPage > 3 && this.currentPage < this.totalPage-2){
+                left = this.currentPage - 2
+                right = this.currentPage + 2
+              }else{
+                if(this.currentPage<=3){
+                  left = 1
+                  right = 5
+                }else{
+                  right = this.totalPage
+                  left = this.totalPage - 4
+                }
+              }
+            }
+            while (left <= right){
+              ar.push(left)
+              left ++
+            }
+            return ar
+          }
+        },
+        methods:{
+          getNoticeContent(v){
+            return v
+          },
+          /*触发函数后再次请求数据*/
+          change(){
+            $.ajax({ type: "POST", url: "/admin/getNotice", dataType: "json",
+              data:JSON.stringify({"query_key":notice_vue.query_key,"currentPage":notice_vue.currentPage,"currentCount":notice_vue.currentCount}), contentType : "application/json",
+              success: function(data) {
+              notice_vue.query_key=data.query_key
+              notice_vue.currentPage=data.currentPage
+              notice_vue.currentCount=data.currentCount
+              notice_vue.totalCount=data.totalCount
+              notice_vue.totalPage=data.totalPage
+              notice_vue.list=[]
+              for(let i=0;i<data.list.length;i++){
+                notice_vue.list[i]=data.list[i];
+              }
+            }});
+          },
+          /* 编辑通知 */
+          openupdate_notice_Modal(notice_Id,notice_Man,notice_Title,notice_Content,notice_Time) {
+            var fatherBody = $(window.top.document.body); //获得父窗体的body
+            //为父窗体添加modal内容
+            fatherBody.append(' \
+                <div class="modal fade in" id="update_notice_model" role="dialog" style="padding-left: 16px; display: block;">\
+                    <div class="modal-dialog">\
+                        <div class="modal-content" style="margin-top:20%">\
+                            <form>\
+                                <div class="modal-header">\
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span\
+                                            aria-hidden="true">&times;</span></button>\
+                                    <h4 class="modal-title" id="myModalLabel" style="text-align: center;">修改通知</h4>\
+                                </div>\
+                                <input type="hidden" id="notice_Id" value='
+                                  +notice_Id+
+                                '>\
+                                <div class="modal-body">\
+                                    <div class="row" style="margin-top: 3px;">\
+                                        <div class="col-md-2" style="padding-left:23px; margin-top: 5px;"><span>通知人:</span></div>\
+                                        <div class="col-md-9 " >\
+                                            <input type="text" id="notice_Man" class="form-control" readonly="readonly" required autofocus  value='
+                                              +notice_Man+
+                                                '>\
+                                        </div>\
+                                    </div>\
+                                    <div class="row"style="margin-top: 3px;">\
+                                        <div class="col-md-2" style="padding-left:23px; margin-top: 5px;"><span>通知标题:</span></div>\
+                                        <div class="col-md-9 ">\
+                                            <input type="text" id="notice_Title" class="form-control" readonly="readonly" required autofocus value='
+                                              +notice_Title+
+                                                '>\
+                                        </div>\
+                                    </div>\
+                                    <div class="row"style="margin-top: 3px;">\
+                                        <div class="col-md-2" style="padding-left:23px; margin-top: 5px;"><span>通知内容:</span></div>\
+                                        <div class="col-md-9">\
+                                            <textarea id="notice_Content" class="form-control" cols="62" rows="6">'
+                                              +notice_Content+
+                                          '</textarea>\
+                                        </div>\
+                                    </div>\
+                                    <div class="row"style="margin-top: 3px;">\
+                                        <div class="col-md-2" style="padding-left:23px; margin-top: 5px;"><span>通知日期:</span></div>\
+                                        <div class="col-md-9">\
+                                            <input type="date" id="notice_Time"class="form-control" required autofocus value='
+                                              +notice_Time+
+                                                '>\
+                                        </div>\
+                                    </div>\
+                                </div>\
+                                <div class="modal-footer">\
+                                <button type="button" class="btn btn-default myclose" data-dismiss="modal">取消</button>\
+                                <button type="button" class="submit_update_notice btn btn-primary">确认修改</button>\
+                            </div>\
+                            </form>\
+                        </div>\
+                    </div>\
+                </div>');
+            fatherBody.append("<div id='backdropId_update_notice' class='modal-backdrop fade in'></div>"); //为父窗体添加遮罩
+        },
+        /* 删除通知 */
+        opendel_notice_Modal(del_id) {
+            var fatherBody = $(window.top.document.body); //获得父窗体的body
+            //为父窗体添加modal内容
+            fatherBody.append(' \
+                <div class="modal fade in" id="del_notice_model" role="dialog" style="padding-left: 16px; display: block;">\
+                    <div class="modal-dialog" style="margin-top:15%">\
+                        <div class="modal-content" style="width:300px;top: 50%;left: 50%;margin-top: -25px;margin-left: -150px;">\
+                            <form>\
+                              <input type="hidden" id="del_notice_id" value='
+                              +del_id+
+                              '>\
+                                <div class="modal-header">\
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span\
+                                            aria-hidden="true">&times;</span></button>\
+                                    <h4 class="modal-title" style="text-align: center;">操作提示</h4>\
+                                </div>\
+                                <div class="modal-body">\
+                                  <label for="message-text" class="control-label">确定要删除所选通知？</label>\
+                                </div>\
+                                <div class="modal-footer">\
+                                <button type="button" class="btn btn-default myclose" data-dismiss="modal">取消</button>\
+                                <button type="button" class="submit_del_notice btn btn-danger">确定</button>\
+                            </div>\
+                            </form>\
+                        </div>\
+                    </div>\
+                </div>');
+            fatherBody.append("<div id='backdropId_del_notice' class='modal-backdrop fade in'></div>"); //为父窗体添加遮罩
+          }
+        }
+      })
+    }});
+  });
+	
+    /* 导出通知数据 */
+    function export_notice(){
+   	 this.location.href="/admin/exportNotice";
+    }
+    
+    /* 添加新的通知 */
+    function openadd_notice_Modal() {
+        var fatherBody = $(window.top.document.body); //获得父窗体的body
+        //为父窗体添加modal内容
+        fatherBody.append(' \
+        		<div class="modal fade in" id="add_notice_model" role="dialog" style="padding-left: 16px; display: block;">\
+                <div class="modal-dialog">\
+                    <div class="modal-content" style="margin-top:20%">\
+                        <form>\
+                            <div class="modal-header">\
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span\
+                                        aria-hidden="true">&times;</span></button>\
+                                <h4 class="modal-title" style="text-align: center;">发布新通知</h4>\
+                            </div>\
+                            <div class="modal-body">\
+                                <div class="row" style="margin-top: 3px;">\
+                                    <div class="col-md-2" style="margin-top: 5px;" ><span>通知人:</span></div>\
+                                    <div class="col-md-9 " style="padding-left:0px">\
+                                        <input type="text" id="notice_Man" class="form-control" required autofocus>\
+                                    </div>\
+                                </div>\
+                                <div class="row"style="margin-top: 3px;">\
+                                    <div class="col-md-2" style="margin-top: 5px;"><span>通知标题:</span></div>\
+                                    <div class="col-md-9 " style="padding-left:0px">\
+                                        <input type="text" id="notice_Title" class="form-control" required autofocus>\
+                                    </div>\
+                                </div>\
+                                <div class="row"style="margin-top: 3px;">\
+                                    <div class="col-md-2" style="margin-top: 5px;"><span>通知内容:</span></div>\
+                                    <div class="col-md-9" style="padding-left:0px">\
+                                        <textarea id="notice_Content" class="form-control" cols="62" rows="6"></textarea>\
+                                    </div>\
+                                </div>\
+                                <div class="row"style="margin-top: 3px;">\
+                                    <div class="col-md-2" style="margin-top: 5px;"><span>通知日期:</span></div>\
+                                    <div class="col-md-9" style="padding-left:0px">\
+                                        <input type="date" id="notice_Time" class="form-control" required autofocus>\
+                                    </div>\
+                                </div>\
+                            </div>\
+                            <div class="modal-footer">\
+                                <button type="button" class="btn btn-default myclose" data-dismiss="modal">取消</button>\
+                                <button type="button" class="submit_add_notice btn btn-primary">确认发布</button>\
+                            </div>\
+                        </form>\
+                    </div>\
+                </div>\
+            </div>');
+        fatherBody.append("<div id='backdropId_add_notice' class='modal-backdrop fade in'></div>"); //为父窗体添加遮罩
+    }
+</script>
+</html>

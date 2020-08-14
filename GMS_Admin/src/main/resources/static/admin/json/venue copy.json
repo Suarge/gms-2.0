@@ -1,0 +1,19 @@
+{
+  "query_key":"羽毛球w",
+  "currentPage":"2",
+  "currentCount":"7",
+  "totalCount":"20",
+  "totalPage":"20",
+  "list":[
+    {"venue_Id":"11","venue_Name":"羽毛球馆1","venue_Type":"羽毛球馆","venue_Capacity":"4","venue_Price":"20.0",
+    "venue_Open":"12","venue_Close":"16"},
+    {"venue_Id":"22","venue_Name":"羽毛球馆3","venue_Type":"羽毛球馆","venue_Capacity":"5","venue_Price":"21.0",
+      "venue_Open":"12","venue_Close":"16"},
+    {"venue_Id":"33","venue_Name":"羽毛球馆3","venue_Type":"羽毛球馆","venue_Capacity":"6","venue_Price":"22.0",
+      "venue_Open":"13","venue_Close":"17"},
+    {"venue_Id":"44","venue_Name":"羽毛球馆4","venue_Type":"羽毛球馆","venue_Capacity":"7","venue_Price":"23.0",
+      "venue_Open":"14","venue_Close":"18"},
+    {"venue_Id":"53","venue_Name":"羽毛球馆5","venue_Type":"羽毛球馆","venue_Capacity":"8","venue_Price":"24.0",
+      "venue_Open":"15","venue_Close":"19"}
+  ]
+}

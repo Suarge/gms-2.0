@@ -1,0 +1,31 @@
+@media screen and (min-width:970px ) {
+	.container{
+		width: 930px;
+	}
+}
+.n_top{
+    background: #fff;
+    padding:10px 20px 20px 20px;
+    margin-top: 5px;
+    
+}
+.n_cont{
+    margin-bottom: 30px; 
+    margin-top: 5px; 
+    line-height: 3em;
+    text-indent:2em;
+    font-size: 18px;
+    width: 860px;
+    word-wrap: break-word;
+    word-break: break-all;
+}
+.top-notice{
+    margin-top: 3px;  
+    padding: 10px 0; 
+    padding-left: 15px;
+    margin-top: 35px;
+}
+.top-notice a{
+    font-size: 14px;
+    text-decoration: none;
+}

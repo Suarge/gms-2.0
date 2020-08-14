@@ -1,0 +1,20 @@
+{
+  "summaryTodayVistors":"101",
+  "summaryTodayOrderProfit":"130,000",
+  "summaryTodayOrderCount":"300",
+  "summaryOrderCountByDateAndVen":"1 2 3 4 5",
+  "summaryVenueVisDateByDate":"5.14 5.15 5.16 5.17 5.18 5.19 5.20",
+  "summaryVenueVisCountByDate":"1 2 3 4 5 6 7",
+  "latestOrderList":[
+    {"order_User":{"user_Id":"2017051114"},"order_Venue":{"venue_Name":"羽毛球馆1",
+      "venue_Type":"羽毛球馆"},"order_Mktime":"2020-05-14 10:01:01","order_Price":"20.0","order_State":"0"},
+    {"order_User":{"user_Id":"2017051115"},"order_Venue":{"venue_Name":"羽毛球馆2",
+      "venue_Type":"羽毛球馆"},"order_Mktime":"2020-05-14 10:01:02","order_Price":"21.0","order_State":"1"},
+    {"order_User":{"user_Id":"2017051116"},"order_Venue":{"venue_Name":"羽毛球馆3",
+      "venue_Type":"羽毛球馆"},"order_Mktime":"2020-05-14 10:01:03","order_Price":"22.0","order_State":"2"},
+    {"order_User":{"user_Id":"2017051117"},"order_Venue":{"venue_Name":"羽毛球馆4",
+      "venue_Type":"羽毛球馆"},"order_Mktime":"2020-05-14 10:01:04","order_Price":"23.0","order_State":"2"},
+    {"order_User":{"user_Id":"2017051118"},"order_Venue":{"venue_Name":"羽毛球馆5",
+      "venue_Type":"羽毛球馆"},"order_Mktime":"2020-05-14 10:01:05","order_Price":"24.0","order_State":"1"}
+  ]
+}

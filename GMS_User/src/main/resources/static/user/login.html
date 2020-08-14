@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>登录</title>
+    <link rel="stylesheet" href="../css/toast.css">
+    <link rel="stylesheet" href="../css/login-style.css" />
+    <link rel="stylesheet" href="../css/showMessage.css">
+    <link rel="stylesheet" href="../css/animate.css">
+</head>
+<body>
+    <div class="sign-up-from">
+        <div id="login_app">
+            <form class="register-form">
+                <img class="imgs" src="../img/count.png" />
+                <h1>会员注册</h1>
+                <input type="text" class="input-box" id="user_Id"  v-model="username" name="username" placeholder="学号/工号" required="true"/>
+                <input type="text" class="input-box"  v-model="user_Sex" name="user_Sex" placeholder="性别" required="true"/>
+                <input type="text" class="input-box"  v-model="user_Age" name="user_Age" placeholder="年龄" required="true"/>
+                <input type="password" class="input-box" id="user_Password" v-model="password" name="password" placeholder="密码" required="true"/>
+                <input type="password" class="input-box" id="user_rePassword"  name="user_rePassword" placeholder="确认密码"required="true" >
+                <input type="email" class="input-box" id="user_Email"  v-model="user_Email" name="user_Email" placeholder="电子邮件" required="true" />
+                <button type="button" class="sign-up-btn" v-on:click="register">创建账户</button>
+                <p class="message">
+                    已经有了一个账户? <a href="#">立刻登录</a>
+                </p>
+            </form>
+
+            <form>
+                <img class="imgs" src="../img/count.png" />
+                <h1>会员登录</h1>
+                <input type="text" class="input-box"  v-model="username" name="username" placeholder="请输入学号/工号" />
+                <input type="password" class="input-box"  v-model="password" name="password" placeholder="请输入密码" /> <span>
+
+<!--                <input type="checkbox" class="check-box" name="remember-me">记住密码</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-->
+<!--                <span><input type="checkbox" name="autoLogin">自动登录</span>-->
+                <button type="button" class="sign-up-btn" v-on:click="login" >登录</button>
+                <!--			<a style="color:red;"></a>-->
+                <p class="message">
+                    还没有账号？<a href="#">立刻创建</a>
+                </p>
+            </form>
+        </div>
+    </div>
+
+</body>
+<!-- 引入表单检验插件 -->
+<script src="../js/jquery-3.4.1.min.js"></script>
+<script src="../js/jquery.validate.min.js"></script>
+<script src="../js/bootstrap.min.js"></script>
+<script src="../js/toast.js"></script>
+<script src="../js/vue.js"></script>
+<script>
+    let flag = true;
+    let isEmail = true;
+    // 同一个页面跳转
+    $(function () {
+        $('.message a').click(function () {
+            $('form').animate({
+                height: 'toggle',
+                opacity: 'toggle'
+            }, 'slow');
+        });
+
+        //注册校验两次密码是否一致
+        $('#user_rePassword').blur(function(){
+            if($("#user_rePassword").val()!=$("#user_Password").val()){
+                showMessage('两次密码不一致',2000,true,'bounceIn-hastrans','bounceOut-hastrans');
+            }
+        });
+
+        //验证邮箱格式是否正确
+        $('#user_Email').blur(function(){
+            var user_Email =$('#user_Email').val();
+            if(!user_Email.match(/^([a-zA-Z0-9_-])+@([a-zA-Z0-9_-])+((\.[a-zA-Z0-9_-]{2,3}){1,2})$/)){
+                showMessage('邮箱格式不正确',2000,true,'bounceIn-hastrans','bounceOut-hastrans');
+                isEmail = false
+            }else{
+                isEmail = true
+            }
+        });
+
+
+        //后台校验用户名是否存在
+        $('#user_Id').blur(function(){
+            var user_Id =$('#user_Id').val();
+
+            $.ajax({
+                "url":"/user/checkUsername",
+                "data":{"user_Id":user_Id},
+                "type":"get",
+                "dataType":"json",
+                "success":function(data){
+                    if(data.info != null){
+                        flag = false;
+                        showMessage('用户名已存在,请输入正确的学号/工号',2000,true,'bounceIn-hastrans','bounceOut-hastrans');
+                    }else{
+                        flag = true;
+                    }
+                }
+            });
+        });
+    })
+
+    let login_register = new Vue({
+        el: "#login_app",
+        data: {
+            username:"",
+            password:"",
+            user_Sex:"",
+            user_Age:"",
+            user_Email:"",
+        },
+        methods: {
+            login: function(){
+                $.post("/user/doLogin",{username:this.username,password:this.password},function (data) {
+                    if (data.status==2){
+                        window.location.href="index";
+                    } else if(data.status==1){
+                        showMessage('用户名或密码错误',1500,true,'bounceIn-hastrans','bounceOut-hastrans');
+                    }else{
+                        toastr.warning(data.info);
+                    }
+                },"json");
+            },
+            register:function(){
+                if(!flag){
+                    showMessage('用户id已被占用，请重新取名',2000,true,'bounceIn-hastrans','bounceOut-hastrans');
+                }else if(!isEmail){
+                    showMessage('邮件格式错误',2000,true,'bounceIn-hastrans','bounceOut-hastrans');
+                }else{
+                    $.ajax({
+                        type: "POST",
+                        url: "/user/register",
+                        dataType: "json",
+                        data: JSON.stringify({user_Id:this.username,user_Password:this.password,user_Sex:this.user_Sex,user_Age:this.user_Age,user_Email:this.user_Email}),
+                        contentType: "application/json",
+                        success: function (data) {
+                            if(data.state == "1"){
+                                showMessage('恭喜你注册成功！',3000,true,'bounceIn-hastrans','bounceOut-hastrans')
+                                setTimeout("window.location.href='/user/login'", 3000);
+                            }else if(data.state == "0"){
+                                showMessage('注册失败，请重试！',3000,true,'bounceIn-hastrans','bounceOut-hastrans')
+                            }
+                        }
+                    });
+                }
+            }
+        },
+
+    });
+
+</script>
+</html>
