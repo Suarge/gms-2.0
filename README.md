@@ -27,12 +27,14 @@ https://github.com/Suarge/gms-1.0
 ## 项目截图
 
 >前台用户部分
+
 ![image](https://github.com/Suarge/gms-2.0/blob/master/readm_photo/1.png)
 ![image](https://github.com/Suarge/gms-2.0/blob/master/readm_photo/2.png)
 ![image](https://github.com/Suarge/gms-2.0/blob/master/readm_photo/3.png)
 ![image](https://github.com/Suarge/gms-2.0/blob/master/readm_photo/4.png)
 
 >后台管理员部分
+
 ![image](https://github.com/Suarge/gms-1.0/blob/master/readme_photo/6.png)
 ![image](https://github.com/Suarge/gms-1.0/blob/master/readme_photo/7.png)
 ![image](https://github.com/Suarge/gms-1.0/blob/master/readme_photo/8.png)
